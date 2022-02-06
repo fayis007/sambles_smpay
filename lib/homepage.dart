@@ -13,7 +13,7 @@ class homepage extends StatefulWidget {
 class _homepageState extends State<homepage> {
   List<Data> data = [];
   String? Status;
-  String url = "https://run.mocky.io/v3/524418e3-88fe-416b-8c7d-809852b8ad35";
+  String url = "https://smreader.net/app/Branches.php";
   Future? objfuture;
   Future<model_status> apiCall() async {
     model_status? objmodelstatus;
@@ -41,7 +41,7 @@ class _homepageState extends State<homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //backgroundColor: Colors.amber,
+      backgroundColor: Colors.amber,
       body: Column(
         children: [
           ListView.builder(

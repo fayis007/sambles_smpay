@@ -15,6 +15,7 @@ class loginpage extends StatefulWidget {
 class _loginpageState extends State<loginpage> {
 
 
+
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _list = [
@@ -68,8 +69,8 @@ class _loginpageState extends State<loginpage> {
                         ),
                         TextFormField(
                           validator: (value) {
-                            if (value!.isEmpty || value.length < 6) {
-                              return "Please Enter 6 characters";
+                            if (value!.isEmpty || value.length < 8) {
+                              return "Please Enter 8 characters";
                             } else {
                               return null;
                             }
@@ -104,7 +105,8 @@ class _loginpageState extends State<loginpage> {
                       shape: StadiumBorder(),
                       color: Colors.blue,
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>homepage()));
+                   //  Navigator.push(context, MaterialPageRoute(builder: (context)=>homepage()));
+                        checklogin(context);
                       },
                       child: Text(
                         "Sign In",
@@ -120,4 +122,18 @@ class _loginpageState extends State<loginpage> {
       ),
     );
   }
-}
+  void checklogin(BuildContext ctx) {
+    final _username = _usernameController.text;
+    final _password = _passwordController.text;
+    if (_username == _password) {
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>homepage()));
+    } else {
+      final _errorMessage = 'username doesnot match';
+      //snackbar
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(10),
+          content: Text(_errorMessage)));
+    }}}
