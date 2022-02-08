@@ -1,8 +1,11 @@
 import 'dart:convert';
-
+import 'dart:math';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:samblesmpay/homepage.dart';
+
 import 'package:samblesmpay/partofsmpay.dart';
+
+import 'home/home_page.dart';
 
 
 class loginpage extends StatefulWidget {
@@ -13,127 +16,156 @@ class loginpage extends StatefulWidget {
 }
 
 class _loginpageState extends State<loginpage> {
+  var panjayath ;
 
-
+  List<Data> data2 = [];
+  String? Status;
+  String url = "https://smreader.net/app/Branches.php";
+  Future? objfuture;
+  Future<model_status> apiCall() async {
+    model_status? objmodelstatus;
+    Future<model_status>logins(String email,String psw )async{
+    var response = await http.post(Uri.encodeFull("https://smreader.net/app/login-App.php"),
+        body: {
+      "username":email,
+      "password":psw,
+    });
+    if (response.statusCode == 200) {
+      try {
+        var data = json.decode(response.body);
+        objmodelstatus = model_status.fromJson(data);
+        print(response.body);
+        setState(() {
+          for (int i = 0; i < objmodelstatus!.data!.length; i++) {
+            data2.add(objmodelstatus.data![i]);
+          }
+        });
+      } catch (e) {
+        print(e);
+      }
+    }
+    return objmodelstatus!;
+  }
 
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _list = [
-    'Panchayath_1',
-    'Panchayath_2',
-    'Panchayath_3',
-    'Panchayath_4',
-  ];
+  dynamic _list = [];
   final Formkey = GlobalKey<FormState>();
   String name = '';
+
+  @override
+  void initState() {
+    objfuture = apiCall();
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: ListView(
-          children: [
-            AppBar(
-              title: Text(
-                "Login",
-                style: TextStyle(fontSize: 30),
-              ),
-            ),
-            Form(
-              key: Formkey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+        body: FutureBuilder(
+          future: objfuture,
+            builder: (context,snap){
+            if(snap.hasData){
+              return ListView(
                 children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 150, left: 20, right: 20),
-                    //  color: Colors.red,
+                  AppBar(
+                    title: Text(
+                      "Login",
+                      style: TextStyle(fontSize: 30),
+                    ),
+                  ),
+                  Form(
+                    key: Formkey,
                     child: Column(
-                      //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        TextFormField(
-                          controller: _usernameController,
-                          decoration: const InputDecoration(
-                              suffixIcon: Icon(Icons.group),
-                              hintText: "Consumer No"),
-                          validator: (value) {
-                            if (value!.isEmpty ) {
-                              return "Please Enter Consumer No";
-                            } else {
-                              return null;
-                            }
-                          },
+                        Container(
+                          margin: EdgeInsets.only(top: 150, left: 20, right: 20),
+                          //  color: Colors.red,
+                          child: Column(
+                            //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextFormField(
+                                controller: _usernameController,
+                                decoration: const InputDecoration(
+                                    suffixIcon: Icon(Icons.group),
+                                    hintText: "Consumer No"),
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Please specify username and password";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              TextFormField(
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Please specify username and password";
+                                  } else {
+                                    return null;
+                                  }
+                                },
+                                obscureText: true,
+                                controller: _passwordController,
+                                decoration: const InputDecoration(
+                                    suffixIcon: Icon(Icons.lock_outline),
+                                    hintText: "Password"),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              DropdownButtonFormField(
+                                onTap: (){
+
+
+                                },
+                                hint: Text("Select Panchayath"),
+                                onChanged: (value) {
+                                  print(value);
+                                },
+                                items: data2.map((e) {
+                                  return DropdownMenuItem(value: e, child: Text(e.name!));
+                                }).toList(),
+                              ),
+                            ],
+                          ),
                         ),
                         SizedBox(
-                          height: 10,
+                          height: 64,
                         ),
-                        TextFormField(
-                          validator: (value) {
-                            if (value!.isEmpty || value.length < 8) {
-                              return "Please Enter 8 characters";
-                            } else {
-                              return null;
-                            }
-                          },
-                          obscureText: true,
-                          controller: _passwordController,
-                          decoration: const InputDecoration(
-                              suffixIcon: Icon(Icons.lock_outline),
-                              hintText: "Password"),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        DropdownButtonFormField(
-                          hint: Text("Select Panchayath"),
-                          onChanged: (value) {
-                            print(value);
-                          },
-                          items: _list.map((e) {
-                            return DropdownMenuItem(value: e, child: Text(e));
-                          }).toList(),
-                        ),
+                        FlatButton(
+                            height: 50,
+                            // minWidth: 40,
+                            shape: StadiumBorder(),
+                            color: Colors.blue,
+                            onPressed: () {
+                              if (Formkey.currentState!.validate()) {
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>homepage()));
+                              }
+                            },
+                            child: Text(
+                              "Sign In",
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            )),
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 64,
-                  ),
-                  FlatButton(
-                      height: 50,
-                      // minWidth: 40,
-                      shape: StadiumBorder(),
-                      color: Colors.blue,
-                      onPressed: () {
-                   //  Navigator.push(context, MaterialPageRoute(builder: (context)=>homepage()));
-                        checklogin(context);
-                      },
-                      child: Text(
-                        "Sign In",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      )),
                 ],
-              ),
-            ),
-          ],
-        ),
+              );
+            }else{
+              return Center(child: Text("Error"),);
+            }
+            })
       ),
     );
   }
-  void checklogin(BuildContext ctx) {
-    final _username = _usernameController.text;
-    final _password = _passwordController.text;
-    if (_username == _password) {
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>homepage()));
-    } else {
-      final _errorMessage = 'username doesnot match';
-      //snackbar
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 5),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.all(10),
-          content: Text(_errorMessage)));
-    }}}
+}

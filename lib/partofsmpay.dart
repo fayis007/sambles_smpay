@@ -25,7 +25,7 @@ class model_status {
 }
 
 class Data {
-  int? id;
+  String? id;
   String? name;
   String? onlinePaymentKey;
   String? onlinePaymentPwd;
