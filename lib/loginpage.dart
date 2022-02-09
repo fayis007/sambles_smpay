@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'dart:math';
+
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 import 'package:samblesmpay/partofsmpay.dart';
 
 import 'home/home_page.dart';
+import 'model_login.dart';
 
 
 class loginpage extends StatefulWidget {
@@ -18,18 +19,16 @@ class loginpage extends StatefulWidget {
 class _loginpageState extends State<loginpage> {
   var panjayath ;
 
-  List<Data> data2 = [];
+  var data2 = [];
   String? Status;
   String url = "https://smreader.net/app/Branches.php";
   Future? objfuture;
-  Future<model_status> apiCall() async {
+  Future<model_status> PanjayathCallingApi() async {
     model_status? objmodelstatus;
-    Future<model_status>logins(String email,String psw )async{
-    var response = await http.post(Uri.encodeFull("https://smreader.net/app/login-App.php"),
-        body: {
-      "username":email,
-      "password":psw,
-    });
+
+    var response = await http.get(Uri.parse(url),
+
+    );
     if (response.statusCode == 200) {
       try {
         var data = json.decode(response.body);
@@ -46,6 +45,28 @@ class _loginpageState extends State<loginpage> {
     }
     return objmodelstatus!;
   }
+  Future<model_StatusClass> loginApiCalling(dynamic id, dynamic email, dynamic password) async {
+    model_StatusClass? objmodelstatusclass;
+
+
+    var response = await http.post(Uri.parse("https://smreader.net/app/login-App.php"),
+        body: {
+          "branchcode":id,
+          "email":email,
+          "pwd":password,
+        });
+    if (response.statusCode == 200) {
+      try {
+        var data = json.decode(response.body);
+        objmodelstatusclass =model_StatusClass.fromJson(data);
+        print(response.body);
+
+      } catch (e) {
+        print(e);
+      }
+    }
+    return objmodelstatusclass!;
+  }
 
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -55,7 +76,7 @@ class _loginpageState extends State<loginpage> {
 
   @override
   void initState() {
-    objfuture = apiCall();
+    objfuture =PanjayathCallingApi();
     // TODO: implement initState
     super.initState();
   }
@@ -146,9 +167,8 @@ class _loginpageState extends State<loginpage> {
                             shape: StadiumBorder(),
                             color: Colors.blue,
                             onPressed: () {
-                              if (Formkey.currentState!.validate()) {
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>homepage()));
-                              }
+                              loginApiCalling(1,_usernameController.text, _passwordController.text);
+
                             },
                             child: Text(
                               "Sign In",
